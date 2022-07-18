@@ -6,7 +6,6 @@ import requests
 def add_task_to_notion(event, context):
     print(f':::EVENT_BODY_TYPE===> {type(event["body"])}')
     event_body = json.loads(event['body'])
-    print(event_body)
     user_email = event_body["user"]["email"]
     contact_name = event_body["full_name"]
     task_body = event_body["task"]["body"]
