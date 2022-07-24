@@ -13,10 +13,11 @@ def add_task_to_notion(event, context):
     task_due_date = event_body["task"]["dueDate"]
     task_database_id = "e4ea055373df4cd79bfb190cd036d177"
     task_title = event_body["task"]["title"]
+    location_id = event_body["location"]["id"]
     
     notion_user_id = get_notion_user_id(user_email)
 
-    children = create_notion_body_children(task_body, contact_name=contact_name, contact_id=contact_id)    
+    children = create_notion_body_children(task_body, contact_name=contact_name, contact_id=contact_id, location_id=location_id)
 
     response = create_notion_task(task_database_id, task_title, task_due_date, notion_user_id, children, notion_user_id)
 
@@ -56,8 +57,8 @@ def get_notion_user_id(user_email):
     # Return data for use in future steps
     return notion_user["id"]
 
-def create_notion_body_children(task_body, contact_name, contact_id):
-    contact_link = f'https://app.lasso.homes/v2/location/NHKutFUXViCWedCP4QIC/contacts/detail/{contact_id}'
+def create_notion_body_children(task_body, contact_name, contact_id, location_id):
+    contact_link = f'https://app.lasso.homes/v2/location/{location_id}/contacts/detail/{contact_id}'
 
     children = [
         {
