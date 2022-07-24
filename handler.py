@@ -4,6 +4,9 @@ from urllib import response
 import requests
 
 def add_task_to_notion(event, context):
+    print(event)
+    print('_________________________________________________________')
+    print(event['body'])
     print(f':::EVENT_BODY_TYPE===> {type(event["body"])}')
     event_body = json.loads(event['body'])
     user_email = event_body["user"]["email"]
