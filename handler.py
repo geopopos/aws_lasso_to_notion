@@ -8,7 +8,7 @@ def add_task_to_notion(event, context):
     event_body = json.loads(event['body'])
     user_email = event_body["user"]["email"]
     contact_name = event_body["full_name"]
-    task_body = event_body["task"]["body"]
+    task_body = event_body["task"].get("body","")
     contact_id = event_body["contact_id"]
     task_due_date = event_body["task"]["dueDate"]
     task_database_id = "e4ea055373df4cd79bfb190cd036d177"
