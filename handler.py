@@ -4,9 +4,6 @@ from urllib import response
 import requests
 
 def add_task_to_notion(event, context):
-    print(event)
-    print('_________________________________________________________')
-    print(event['body'])
     print(f':::EVENT_BODY_TYPE===> {type(event["body"])}')
     event_body = json.loads(event['body'])
     user_email = event_body["user"]["email"]
@@ -36,6 +33,7 @@ def add_task_to_notion(event, context):
     """
 
 def get_notion_user_id(user_email):
+    
     NOTION_SECRET = os.getenv("NOTION_SECRET")
 
     # Get All Users In Notion
@@ -54,9 +52,11 @@ def get_notion_user_id(user_email):
     body = json.loads(response.text)
 
     results = body['results']
-    results = filter(lambda x: 'person' in x.keys(), results)
+    results_people = list((x for x in results if 'person' in x.keys()))
 
-    notion_user = next((i for i in results if i['person']['email'] == user_email), None)
+    notion_user = next((i for i in results_people if i['person']['email'] == user_email), None)
+    if notion_user is None:
+        notion_user = next((i for i in results_people if i['person']['email'] == 'george@volumeup.agency'), None)
 
     # Return data for use in future steps
     return notion_user["id"]
@@ -157,6 +157,7 @@ def create_notion_task(task_database_id, event_title, event_start_date, assigner
     task_body = json.dumps(task_body)
     
     task_response = requests.post(task_url, data=task_body, headers=task_headers)
+
     
     response_body = json.loads(task_response.text)
     response = {
