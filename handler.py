@@ -51,6 +51,7 @@ def get_notion_user_id(user_email):
     body = json.loads(response.text)
 
     results = body['results']
+    results = filter(lambda x: 'person' in x.keys(), results)
 
     notion_user = next((i for i in results if i['person']['email'] == user_email), None)
 
