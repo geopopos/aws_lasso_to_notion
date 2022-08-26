@@ -2,9 +2,14 @@ import json
 import os
 from urllib import response
 import requests
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 
 def add_task_to_notion(event, context):
-    print(f':::EVENT_BODY_TYPE===> {type(event["body"])}')
+    logger.info(f"Incoming Event ==> {event}")
     event_body = json.loads(event['body'])
     user_email = event_body["user"]["email"]
     contact_name = event_body["full_name"]
@@ -15,10 +20,13 @@ def add_task_to_notion(event, context):
     task_title = event_body["task"]["title"]
     location_id = event_body["location"]["id"]
     
+    logger.info(f"Called get_notion_user_id with user_email {user_email}")
     notion_user_id = get_notion_user_id(user_email)
 
+    logger.info(f"Called create_notion_body_children")
     children = create_notion_body_children(task_body, contact_name=contact_name, contact_id=contact_id, location_id=location_id)
 
+    logger.info(f"Called create_notion_task")
     response = create_notion_task(task_database_id, task_title, task_due_date, notion_user_id, children, notion_user_id)
 
     return response
@@ -50,6 +58,7 @@ def get_notion_user_id(user_email):
     response = requests.get(url, headers=headers)
 
     body = json.loads(response.text)
+    logger.info(f"Response Body ==> {body}")
 
     results = body['results']
     results_people = list((x for x in results if 'person' in x.keys()))
@@ -58,6 +67,7 @@ def get_notion_user_id(user_email):
     if notion_user is None:
         notion_user = next((i for i in results_people if i['person']['email'] == 'george@volumeup.agency'), None)
 
+    logger.info(f"NOTION USER :==> {notion_user}")
     # Return data for use in future steps
     return notion_user["id"]
 
@@ -96,6 +106,7 @@ def create_notion_body_children(task_body, contact_name, contact_id, location_id
         }
     ]
 
+    logger.info(f"NOTION BODY CHILDREN :==> {children}")
     return children
 
 def create_notion_task(task_database_id, event_title, event_start_date, assigner_id, children, assignee_id):
@@ -164,5 +175,7 @@ def create_notion_task(task_database_id, event_title, event_start_date, assigner
         "statusCode": 200,
         "body": json.dumps(response_body)
     }
+
+    logger.info(f"NOTION TASK RESPONSE :==> {response}")
 
     return response
