@@ -73,6 +73,7 @@ functions:
     environment:
       # secret stored in serverless project parameters: https://app.serverless.com/groros/apps/lasso-to-notion/lasso-task-2-notion/dev/us-east-1/parameters
       NOTION_SECRET: ${param:NOTION_SECRET}
+      GHL_AGENCY_API_KEY: ${param:GHL_AGENCY_API_KEY}
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

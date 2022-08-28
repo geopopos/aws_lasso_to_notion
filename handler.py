@@ -19,6 +19,14 @@ def add_task_to_notion(event, context):
     task_database_id = "e4ea055373df4cd79bfb190cd036d177"
     task_title = event_body["task"]["title"]
     location_id = event_body["location"]["id"]
+
+    agency_api_key = os.getenv("GHL_AGENCY_API_KEY")
+    
+    logger.info("Getting Assignee Email")
+    user_email_task = get_assignee_email(location_id, agency_api_key, contact_id, task_title)
+
+    # set user email to assignee email if there is an assignee for the task, else use contact user email
+    user_email = user_email_task if user_email_task else user_email
     
     logger.info(f"Called get_notion_user_id with user_email {user_email}")
     notion_user_id = get_notion_user_id(user_email)
@@ -39,6 +47,54 @@ def add_task_to_notion(event, context):
         "event": event
     }
     """
+
+def get_assignee_email(location_id, agency_api_key, contact_id, task_title):
+    # get go high level location api key
+    location_api_key_url = f"https://rest.gohighlevel.com/v1/locations/{location_id}"
+    headers = {
+        "Authorization": f"Bearer {agency_api_key}",
+    }
+
+    location_response = requests.get(location_api_key_url, headers=headers)
+    location_response = json.loads(location_response.text)
+
+    location_api_key = location_response["apiKey"]
+    # get all tasks for contact id
+    get_tasks_api_url = f"https://rest.gohighlevel.com/v1/contacts/{contact_id}/tasks"
+
+    headers = {
+        "Authorization": f"Bearer {location_api_key}",
+    }
+
+    task_response = requests.get(get_tasks_api_url, headers=headers)
+    task_response = json.loads(task_response.text)
+
+    tasks = task_response.get("tasks", [])
+
+    # match task title to current task title
+    filtered_tasks = filter(lambda x: x["title"] == task_title, tasks)
+
+    task = list(filtered_tasks)[0]
+
+    user_id = task.get("assignedTo", "")
+
+    # get ghl user info
+    get_user_url = f"https://rest.gohighlevel.com/v1/users/{user_id}"
+
+    headers = {
+        "Authorization": f"Bearer {agency_api_key}",
+    }
+
+    user_response = requests.get(get_user_url, headers=headers)
+    user_response = json.loads(user_response.text)
+
+    email = user_response.get("email", "")
+
+    # return email
+    return email
+    
+
+
 
 def get_notion_user_id(user_email):
     
