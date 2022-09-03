@@ -11,7 +11,9 @@ logger.setLevel(logging.INFO)
 def add_task_to_notion(event, context):
     logger.info(f"Incoming Event ==> {event}")
     event_body = json.loads(event['body'])
-    user_email = event_body["user"]["email"]
+    user = event_body.get('user', "")
+    if user:
+        user_email = user["email"]
     contact_name = event_body["full_name"]
     task_body = event_body["task"].get("body","")
     contact_id = event_body["contact_id"]
